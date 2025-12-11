@@ -67,6 +67,13 @@ public class Module {
         }
     }
 
+    public Setting<?> getSettingByName(String name) {
+        return settings.stream()
+                .filter(setting -> setting.getName().replace(" ", "").equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+    }
+
     protected void onEnable() {}
 
     protected void onDisable() {}

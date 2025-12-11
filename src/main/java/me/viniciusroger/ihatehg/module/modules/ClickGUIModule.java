@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Keyboard;
 
 public class ClickGUIModule extends Module {
-    private ClickGUI clickGUI;
+    public ClickGUI clickGUI;
 
     public ClickGUIModule() {
         super("ClickGUI", Keyboard.KEY_INSERT);
@@ -15,10 +15,6 @@ public class ClickGUIModule extends Module {
 
     @SubscribeEvent
     public void onPreUpdate(PreUpdateEvent event) {
-        if (clickGUI == null) {
-            clickGUI = new ClickGUI();
-        }
-
         mc.displayGuiScreen(clickGUI);
 
         setEnabled(false);

@@ -216,24 +216,22 @@ public class AutoRecraft extends Module {
     }
 
     private boolean hasCocoaRecraft() {
-        boolean bowl = false;
-        boolean cocoa = false;
+        AtomicBoolean bowl = new AtomicBoolean(false);
+        AtomicBoolean cocoa = new AtomicBoolean(false);
 
-        for (int i = 9; i < 45; i++) {
-            ItemStack itemStack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-
+        Arrays.stream(mc.thePlayer.inventory.mainInventory).forEach(itemStack -> {
             if (itemStack != null) {
                 if (itemStack.getItem() instanceof ItemDye) {
                     if (EnumDyeColor.byMetadata(itemStack.getMetadata()) == EnumDyeColor.BROWN) {
-                        cocoa = true;
+                        cocoa.set(true);
                     }
                 } else if (itemStack.getItem() == Items.bowl) {
-                    bowl = true;
+                    bowl.set(true);
                 }
             }
-        }
+        });
 
-        return bowl && cocoa;
+        return bowl.get() && cocoa.get();
     }
 
     private boolean hasMushroomRecraft() {

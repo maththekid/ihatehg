@@ -146,7 +146,7 @@ public class ClickGUI extends GuiScreen {
                             return true;
                         });
 
-                        renderListeners.add(() -> keybindButtonSetting.setValue(keybindButtonSetting.getValue()));
+                        renderListeners.add(() -> keybindButtonSetting.setValue(keybindSetting.getValue()));
 
                         settingsPane.addComponent(keybindButtonSetting);
                     }
