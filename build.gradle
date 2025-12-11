@@ -1,0 +1,96 @@
+buildscript {
+    repositories {
+        maven { url "https://maven.minecraftforge.net" }
+        maven { url 'https://repo.spongepowered.org/maven'}
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT"
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+    }
+}
+
+plugins {
+    id "java"
+    id "com.github.johnrengelman.shadow" version "2.0.4"
+}
+
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: 'org.spongepowered.mixin'
+
+version = "1.0"
+group = "me.viniciusroger"
+archivesBaseName = "ihatehg"
+
+sourceCompatibility = targetCompatibility = 1.8
+compileJava.options.encoding = "UTF-8"
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_22"
+    makeObfSourceJar = false
+}
+
+configurations {
+    shade
+    compile.extendsFrom(shade)
+}
+
+repositories {
+    maven { url 'https://repo.spongepowered.org/maven/' }
+}
+
+dependencies {
+    shade('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+        exclude module: 'gson'
+        exclude module: 'commons-io'
+        exclude module: 'log4j-core'
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include "mcmod.info"
+
+        expand "version":project.version, "mcversion":project.minecraft.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "mcmod.info"
+    }
+
+    rename '(.+_at.cfg)', 'META-INF/$1'
+}
+
+shadowJar {
+    dependencies {}
+    configurations = [project.configurations.shade]
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    classifier ""
+}
+
+reobf {
+    shadowJar {}
+}
+
+jar {
+    manifest.attributes(
+        "ForceLoadAsMod": true,
+        "TweakOrder": 0,
+        "ModSide": "CLIENT",
+        'FMLCorePluginContainsFMLMod': true,
+        'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+        'MixinConfigs': 'mixin.ihatehg.json'
+    )
+}
+
+sourceSets {
+    main {
+        ext.refMap = "refmap.ihatehg.json"
+    }
+}

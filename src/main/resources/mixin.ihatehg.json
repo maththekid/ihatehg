@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "minVersion": "0.7",
+  "package": "me.viniciusroger.ihatehg.mixins",
+  "refmap": "refmap.ihatehg.json",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MixinEntityPlayerSP",
+    "MixinMinecraft"
+  ]
+}

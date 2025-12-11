@@ -1,0 +1,16 @@
+[
+{
+  "modid": "ihatehg",
+  "name": "I Hate HG",
+  "description": "idk",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["viniciusroger"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
