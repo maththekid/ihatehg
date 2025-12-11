@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class AutoRefil extends Module {
     private final ListSetting mode = new ListSetting("Mode", 0, new String[]{"Automatic", "Manual", "Both"});
-    private final KeybindSetting manualBind = new KeybindSetting("Manual bind", Keyboard.KEY_X);
+    private final KeybindSetting manualBind = new KeybindSetting("Manual bind", Keyboard.KEY_NONE);
     private final NumberSetting<Integer> startWith = new NumberSetting<>("Start with", 4, 0, 9, 1);
     private final NumberSetting<Integer> refilDelay = new NumberSetting<>("Refil delay", 42, 1, 400, 1);
     private final BooleanSetting randomize = new BooleanSetting("Randomize", false);

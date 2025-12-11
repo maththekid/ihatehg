@@ -76,4 +76,18 @@ public class InventoryUtil extends AbstractUtil {
 
         return counter == 9;
     }
+
+    public static int getTotalSoupsInInventory() {
+        int counter = 0;
+
+        for (int i = 9; i < 45; i++) {
+            ItemStack itemStack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+
+            if (itemStack != null && itemStack.getItem() instanceof ItemSoup) {
+                counter++;
+            }
+        }
+
+        return counter;
+    }
 }

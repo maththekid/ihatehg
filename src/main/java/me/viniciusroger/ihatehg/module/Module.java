@@ -68,6 +68,7 @@ public class Module {
     }
 
     protected void onEnable() {}
+
     protected void onDisable() {}
 
     private void enable() {
@@ -77,9 +78,9 @@ public class Module {
     }
 
     private void disable() {
-        onDisable();
-
         MinecraftForge.EVENT_BUS.unregister(this);
+
+        onDisable();
     }
 
     public void toggle() {

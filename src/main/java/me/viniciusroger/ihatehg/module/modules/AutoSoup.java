@@ -1,5 +1,6 @@
 package me.viniciusroger.ihatehg.module.modules;
 
+import me.viniciusroger.ihatehg.events.KeyPressEvent;
 import me.viniciusroger.ihatehg.events.PreUpdateEvent;
 import me.viniciusroger.ihatehg.module.Module;
 import me.viniciusroger.ihatehg.setting.settings.BooleanSetting;
@@ -42,6 +43,15 @@ public class AutoSoup extends Module {
     protected void onDisable() {
         reset();
         originalIndex = Integer.MIN_VALUE;
+    }
+
+    @SubscribeEvent
+    public void onKeyPress(KeyPressEvent event) {
+        if (mode.getValue().equals("Manual") && event.getKey() == manualBind.getValue()) {
+            originalIndex = mc.thePlayer.inventory.currentItem;
+
+            start = true;
+        }
     }
 
     @SubscribeEvent
@@ -110,7 +120,7 @@ public class AutoSoup extends Module {
             soupIndex = InventoryUtil.getSoupInHotbar();
 
             if (soupIndex != Integer.MIN_VALUE) {
-                if ((mode.getValue().equals("Automatic") && mc.thePlayer.getHealth() <= health.getValue()) || Keyboard.isKeyDown(manualBind.getValue())) {
+                if (mode.getValue().equals("Automatic") && mc.thePlayer.getHealth() <= health.getValue()) {
                     originalIndex = mc.thePlayer.inventory.currentItem;
 
                     start = true;
