@@ -83,13 +83,9 @@ public class AutoRecraft extends Module {
 
                                 break;
                             case 5:
-                                if (mc.thePlayer.inventoryContainer.getSlot(0).getStack() == null) {
-                                    step++;
-
-                                    break;
-                                }
-
                                 mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, 0, 0, 1, mc.thePlayer);
+
+                                step++;
 
                                 break;
                             case 6:
