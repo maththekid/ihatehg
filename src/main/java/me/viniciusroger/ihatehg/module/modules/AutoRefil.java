@@ -1,5 +1,6 @@
 package me.viniciusroger.ihatehg.module.modules;
 
+import me.viniciusroger.ihatehg.IHateHG;
 import me.viniciusroger.ihatehg.events.PreUpdateEvent;
 import me.viniciusroger.ihatehg.module.Module;
 import me.viniciusroger.ihatehg.setting.settings.BooleanSetting;
@@ -8,6 +9,7 @@ import me.viniciusroger.ihatehg.setting.settings.ListSetting;
 import me.viniciusroger.ihatehg.setting.settings.NumberSetting;
 import me.viniciusroger.ihatehg.util.misc.TimerHelper;
 import me.viniciusroger.ihatehg.util.player.InventoryUtil;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.lang3.RandomUtils;
 import org.lwjgl.input.Keyboard;
@@ -31,7 +33,15 @@ public class AutoRefil extends Module {
 
     @SubscribeEvent
     public void onPreUpdate(PreUpdateEvent event) {
-        if (mc.currentScreen == null) {
+        if (mc.currentScreen == null || !(mc.currentScreen instanceof GuiInventory)) {
+            reset();
+
+            return;
+        }
+
+        AutoRecraft autoRecraft = IHateHG.getModuleManager().getModuleByClass(AutoRecraft.class);
+
+        if (autoRecraft.isEnabled() && autoRecraft.start) {
             reset();
 
             return;

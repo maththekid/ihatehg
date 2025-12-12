@@ -17,9 +17,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 public class AutoRecraft extends Module {
     private final ListSetting mode = new ListSetting("Mode", 0, new String[]{"Automatic", "Manual", "Both"});
@@ -33,7 +35,7 @@ public class AutoRecraft extends Module {
     private final TimerHelper recraftTimer = new TimerHelper();
 
     private final HashMap<String, Integer> recraftMap = new HashMap<>();
-    private boolean start = false;
+    public boolean start = false;
     private int step = 1;
 
     @Override
@@ -256,25 +258,20 @@ public class AutoRecraft extends Module {
         return bowl.get() && red_mushroom.get() && brown_mushroom.get();
     }
 
-    // o sort tá meio ruim
-    // mas funciona, isso que importa!
     private void getRecraft(RecraftType type) {
-        Map<Integer, HashMap<Integer, String>> itemSlotMap = new HashMap<>();
+        HashMap<Integer, String> itemSlotMap = new HashMap<>();
 
         for (int i = 9; i < 45; i++) {
-            HashMap<Integer, String> itemMap = new HashMap<>();
             ItemStack itemStack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
 
             switch (type) {
                 case COCOA:
                     if (itemStack != null) {
                         if (itemStack.getItem() == Items.bowl) {
-                            itemMap.put(itemStack.getMaxStackSize(), "bowl");
-                            itemSlotMap.put(i, itemMap);
+                            itemSlotMap.put(i, "bowl");
                         } else if (itemStack.getItem() instanceof ItemDye) {
                             if (EnumDyeColor.byDyeDamage(itemStack.getMetadata()) == EnumDyeColor.BROWN) {
-                                itemMap.put(itemStack.getMaxStackSize(), "cocoa");
-                                itemSlotMap.put(i, itemMap);
+                                itemSlotMap.put(i, "cocoa");
                             }
                         }
                     }
@@ -283,17 +280,14 @@ public class AutoRecraft extends Module {
                 case MUSHROOM:
                     if (itemStack != null) {
                         if (itemStack.getItem() == Items.bowl) {
-                            itemMap.put(itemStack.getMaxStackSize(), "bowl");
-                            itemSlotMap.put(i, itemMap);
+                            itemSlotMap.put(i, "bowl");
                         } else if (itemStack.getItem() instanceof ItemBlock) {
                             Block block = ((ItemBlock) itemStack.getItem()).getBlock();
 
                             if (block == Blocks.red_mushroom) {
-                                itemMap.put(itemStack.getMaxStackSize(), "red");
-                                itemSlotMap.put(i, itemMap);
+                                itemSlotMap.put(i, "red");
                             } else if (block == Blocks.brown_mushroom) {
-                                itemMap.put(itemStack.getMaxStackSize(), "brown");
-                                itemSlotMap.put(i, itemMap);
+                                itemSlotMap.put(i, "brown");
                             }
                         }
                     }
@@ -302,24 +296,15 @@ public class AutoRecraft extends Module {
             }
         }
 
-        itemSlotMap.entrySet().stream()
-                .sorted((e1, e2) -> {
-                    int size1;
-                    int size2;
+        Stream<Map.Entry<Integer, String>> itemSlotStream = itemSlotMap.entrySet().stream();
 
-                    if (sortMode.getValue().equals("Size")) {
-                        size1 = e1.getValue().entrySet().stream().findFirst().map(Map.Entry::getKey).orElse(0);
-                        size2 = e2.getValue().entrySet().stream().findFirst().map(Map.Entry::getKey).orElse(0);
+        if (sortMode.getValue().equals("Size")) {
+            itemSlotStream = itemSlotStream.sorted(Comparator.comparingInt(entrySet -> mc.thePlayer.inventoryContainer.getSlot(entrySet.getKey()).getStack().stackSize));
+        } else {
+            itemSlotStream = itemSlotStream.sorted(Map.Entry.comparingByKey((e1, e2) -> e2 - e1));
+        }
 
-                        return size1 - size2;
-                    } else {
-                        size1 = e1.getKey();
-                        size2 = e2.getKey();
-
-                        return size2 - size1;
-                    }
-                })
-                .forEach(result -> recraftMap.put(result.getValue().values().stream().findFirst().orElse("unknown"), result.getKey()));
+        itemSlotStream.forEach(entrySet -> recraftMap.put(entrySet.getValue(), entrySet.getKey()));
     }
 
     private void reset() {

@@ -63,6 +63,10 @@ public class AutoSoup extends Module {
         }
 
         if (start) {
+            if (step >= 2 && step <= 3 && mc.thePlayer.inventory.currentItem != soupIndex) {
+                mc.thePlayer.inventory.currentItem = soupIndex;
+            }
+
             switch (step) {
                 case 1:
                     if (switchTimer.hasTimeReached(switchDelay.getValue(), true)) {
