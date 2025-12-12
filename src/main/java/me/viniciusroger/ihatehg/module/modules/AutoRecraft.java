@@ -93,16 +93,6 @@ public class AutoRecraft extends Module {
 
                                 break;
                             case 6:
-                                if (mc.thePlayer.inventoryContainer.getSlot(3).getStack() == null) {
-                                    step++;
-
-                                    break;
-                                }
-
-                                mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, 3, 0, 1, mc.thePlayer);
-
-                                break;
-                            case 7:
                                 if (mc.thePlayer.inventoryContainer.getSlot(2).getStack() == null) {
                                     step++;
 
@@ -110,6 +100,16 @@ public class AutoRecraft extends Module {
                                 }
 
                                 mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, 2, 0, 1, mc.thePlayer);
+
+                                break;
+                            case 7:
+                                if (mc.thePlayer.inventoryContainer.getSlot(1).getStack() == null) {
+                                    step++;
+
+                                    break;
+                                }
+
+                                mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, 1, 0, 1, mc.thePlayer);
 
                                 break;
                             case 8:
@@ -222,7 +222,7 @@ public class AutoRecraft extends Module {
         Arrays.stream(mc.thePlayer.inventory.mainInventory).forEach(itemStack -> {
             if (itemStack != null) {
                 if (itemStack.getItem() instanceof ItemDye) {
-                    if (EnumDyeColor.byMetadata(itemStack.getMetadata()) == EnumDyeColor.BROWN) {
+                    if (EnumDyeColor.byDyeDamage(itemStack.getMetadata()) == EnumDyeColor.BROWN) {
                         cocoa.set(true);
                     }
                 } else if (itemStack.getItem() == Items.bowl) {
@@ -276,8 +276,9 @@ public class AutoRecraft extends Module {
                             itemMap.put(itemStack.getMaxStackSize(), "bowl");
                             itemSlotMap.put(i, itemMap);
                         } else if (itemStack.getItem() instanceof ItemDye) {
-                            if (EnumDyeColor.byMetadata(itemStack.getMetadata()) == EnumDyeColor.BROWN) {
+                            if (EnumDyeColor.byDyeDamage(itemStack.getMetadata()) == EnumDyeColor.BROWN) {
                                 itemMap.put(itemStack.getMaxStackSize(), "cocoa");
+                                itemSlotMap.put(i, itemMap);
                             }
                         }
                     }
@@ -323,8 +324,6 @@ public class AutoRecraft extends Module {
                     }
                 })
                 .forEach(result -> recraftMap.put(result.getValue().values().stream().findFirst().orElse("unknown"), result.getKey()));
-
-        System.out.println(recraftMap.size());
     }
 
     private void reset() {
