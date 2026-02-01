@@ -57,8 +57,6 @@ public class AutoSoup extends Module {
     @SubscribeEvent
     public void onPreUpdate(PreUpdateEvent event) {
         if (mc.currentScreen != null) {
-            reset();
-
             return;
         }
 

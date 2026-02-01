@@ -30,6 +30,7 @@ public class AutoRecraft extends Module {
     private final NumberSetting<Integer> recraftDelay = new NumberSetting<>("Recraft Delay", 42, 1, 400, 1);
     private final BooleanSetting cocoaMode = new BooleanSetting("Cocoa", false);
     private final BooleanSetting mushroomMode = new BooleanSetting("Mushroom", true);
+    private final BooleanSetting cactusMode = new BooleanSetting("Cactus", true);
     private final ListSetting sortMode = new ListSetting("Sort by", 0, new String[]{"Size", "Index"});
 
     private final TimerHelper recraftTimer = new TimerHelper();
@@ -58,7 +59,7 @@ public class AutoRecraft extends Module {
         if (start) {
             if (!recraftMap.isEmpty()) {
                 if (recraftTimer.hasTimeReached(recraftDelay.getValue(), true)) {
-                    if (recraftMap.size() == 2) { // outros recraft(por enquanto, só cocoa)
+                    if (recraftMap.size() == 2) { // outros recraft
                         switch (step) {
                             case 1:
                                 mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, recraftMap.get("bowl"), 1, 0, mc.thePlayer);
@@ -73,7 +74,11 @@ public class AutoRecraft extends Module {
 
                                 break;
                             case 3:
-                                mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, recraftMap.get("cocoa"), 1, 0, mc.thePlayer);
+                                if (cactusMode.getValue() && recraftMap.containsKey("cactus")) {
+                                    mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, recraftMap.get("cactus"), 1, 0, mc.thePlayer);
+                                } else if (cocoaMode.getValue() && recraftMap.containsKey("cocoa")) {
+                                    mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, recraftMap.get("cocoa"), 1, 0, mc.thePlayer);
+                                }
 
                                 step++;
 
@@ -202,7 +207,9 @@ public class AutoRecraft extends Module {
         } else {
             if ((!mode.getValue().equals("Manual") && InventoryUtil.getTotalSoupsInInventory() <= startWith.getValue()) ||
                     (!mode.getValue().equals("Automatic") && Keyboard.isKeyDown(manualBind.getValue()))) {
-                if (cocoaMode.getValue() && hasCocoaRecraft()) {
+                if (cactusMode.getValue() && hasCactusRecraft()) {
+                    getRecraft(RecraftType.CACTUS);
+                } else if (cocoaMode.getValue() && hasCocoaRecraft()) {
                     getRecraft(RecraftType.COCOA);
                 } else if (mushroomMode.getValue() && hasMushroomRecraft()) {
                     getRecraft(RecraftType.MUSHROOM);
@@ -258,15 +265,38 @@ public class AutoRecraft extends Module {
         return bowl.get() && red_mushroom.get() && brown_mushroom.get();
     }
 
+    private boolean hasCactusRecraft() {
+        AtomicBoolean bowl = new AtomicBoolean(false);
+        AtomicBoolean cactus = new AtomicBoolean(false);
+
+        Arrays.stream(mc.thePlayer.inventory.mainInventory).forEach(itemStack -> {
+            if (itemStack != null) {
+                if (itemStack.getItem() instanceof ItemBlock) {
+                    Block block = ((ItemBlock) itemStack.getItem()).getBlock();
+
+                    if (block == Blocks.red_mushroom) {
+                        cactus.set(true);
+                    }
+                } else {
+                    if (itemStack.getItem() == Items.bowl) {
+                        bowl.set(true);
+                    }
+                }
+            }
+        });
+
+        return bowl.get() && cactus.get();
+    }
+
     private void getRecraft(RecraftType type) {
         HashMap<Integer, String> itemSlotMap = new HashMap<>();
 
         for (int i = 9; i < 45; i++) {
             ItemStack itemStack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
 
-            switch (type) {
-                case COCOA:
-                    if (itemStack != null) {
+            if (itemStack != null) {
+                switch (type) {
+                    case COCOA:
                         if (itemStack.getItem() == Items.bowl) {
                             itemSlotMap.put(i, "bowl");
                         } else if (itemStack.getItem() instanceof ItemDye) {
@@ -274,11 +304,9 @@ public class AutoRecraft extends Module {
                                 itemSlotMap.put(i, "cocoa");
                             }
                         }
-                    }
 
-                    break;
-                case MUSHROOM:
-                    if (itemStack != null) {
+                        break;
+                    case MUSHROOM:
                         if (itemStack.getItem() == Items.bowl) {
                             itemSlotMap.put(i, "bowl");
                         } else if (itemStack.getItem() instanceof ItemBlock) {
@@ -290,9 +318,21 @@ public class AutoRecraft extends Module {
                                 itemSlotMap.put(i, "brown");
                             }
                         }
-                    }
 
-                    break;
+                        break;
+                    case CACTUS:
+                        if (itemStack.getItem() == Items.bowl) {
+                            itemSlotMap.put(i, "bowl");
+                        } else if (itemStack.getItem() instanceof ItemBlock) {
+                            Block block = ((ItemBlock) itemStack.getItem()).getBlock();
+
+                            if (block == Blocks.cactus) {
+                                itemSlotMap.put(i, "cactus");
+                            }
+                        }
+
+                        break;
+                }
             }
         }
 
@@ -317,6 +357,7 @@ public class AutoRecraft extends Module {
 
     private enum RecraftType {
         COCOA,
-        MUSHROOM
+        MUSHROOM,
+        CACTUS
     }
 }
