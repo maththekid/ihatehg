@@ -2,4 +2,4 @@
 ## Info
 hg utilly mod for forge 1.8.9
 ## Contact
-discord: https://discord.gg/Mh5GxfZM9E
+if you found bug, want help or get config, join on my discord: https://discord.gg/3KZFg5R68y
