@@ -14,6 +14,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Keyboard;
 
@@ -42,7 +43,13 @@ public class AutoSoup extends Module {
     @Override
     protected void onDisable() {
         reset();
-        originalIndex = Integer.MIN_VALUE;
+    }
+
+    @SubscribeEvent
+    public void onJoinWorld(EntityJoinWorldEvent event) {
+        if (event.entity == mc.thePlayer && event.world != mc.theWorld) {
+            reset();
+        }
     }
 
     @SubscribeEvent

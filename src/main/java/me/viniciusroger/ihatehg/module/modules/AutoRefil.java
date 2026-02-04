@@ -10,6 +10,7 @@ import me.viniciusroger.ihatehg.setting.settings.NumberSetting;
 import me.viniciusroger.ihatehg.util.misc.TimerHelper;
 import me.viniciusroger.ihatehg.util.player.InventoryUtil;
 import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.lang3.RandomUtils;
 import org.lwjgl.input.Keyboard;
@@ -29,6 +30,18 @@ public class AutoRefil extends Module {
 
     public AutoRefil() {
         super("AutoRefil", Keyboard.KEY_NONE);
+    }
+
+    @Override
+    protected void onDisable() {
+        reset();
+    }
+
+    @SubscribeEvent
+    public void onJoinWorld(EntityJoinWorldEvent event) {
+        if (event.entity == mc.thePlayer && event.world != mc.theWorld) {
+            reset();
+        }
     }
 
     @SubscribeEvent
@@ -74,9 +87,8 @@ public class AutoRefil extends Module {
                 }
             }
         } else {
-            if (!mode.getValue().equals("Automatic") && Keyboard.isKeyDown(manualBind.getValue())) {
-                start = true;
-            } else if (!mode.getValue().equals("Manual") && InventoryUtil.getSoupAmountInHotbar() <= startWith.getValue()) {
+            if ((!mode.getValue().equals("Automatic") && Keyboard.isKeyDown(manualBind.getValue())) ||
+                    (!mode.getValue().equals("Manual") && InventoryUtil.getSoupAmountInHotbar() <= startWith.getValue())) {
                 start = true;
             }
         }
