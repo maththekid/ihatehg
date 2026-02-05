@@ -18,13 +18,16 @@ import org.lwjgl.input.Keyboard;
 import java.util.ArrayList;
 
 public class AutoRefil extends Module {
+    private final NumberSetting<Integer> refilMinDelay = new NumberSetting<>("Refil Min delay", 3, 1, 400, 1);
+    private final NumberSetting<Integer> refilMaxDelay = new NumberSetting<>("Refil Max delay", 5, 1, 400, 1);
     private final ListSetting mode = new ListSetting("Mode", 0, new String[]{"Automatic", "Manual", "Both"});
     private final KeybindSetting manualBind = new KeybindSetting("Manual bind", Keyboard.KEY_NONE);
     private final NumberSetting<Integer> startWith = new NumberSetting<>("Start with", 4, 0, 9, 1);
-    private final NumberSetting<Integer> refilDelay = new NumberSetting<>("Refil delay", 42, 1, 400, 1);
     private final BooleanSetting randomize = new BooleanSetting("Randomize", false);
 
     private final TimerHelper refilTimer = new TimerHelper();
+
+    private long delay = 0;
 
     private boolean start = false;
 
@@ -67,7 +70,9 @@ public class AutoRefil extends Module {
                 return;
             }
 
-            if (refilTimer.hasTimeReached(refilDelay.getValue(), true)) {
+            if (refilTimer.hasTimeReached(delay, true)) {
+                delay = RandomUtils.nextLong(Math.min(refilMinDelay.getValue(), refilMaxDelay.getValue()), Math.max(refilMinDelay.getValue(), refilMaxDelay.getValue()));
+
                 if (randomize.getValue()) {
                     ArrayList<Integer> soupSlots = InventoryUtil.getSoupSlots();
 
@@ -89,6 +94,8 @@ public class AutoRefil extends Module {
         } else {
             if ((!mode.getValue().equals("Automatic") && Keyboard.isKeyDown(manualBind.getValue())) ||
                     (!mode.getValue().equals("Manual") && InventoryUtil.getSoupAmountInHotbar() <= startWith.getValue())) {
+                RandomUtils.nextLong(Math.min(refilMinDelay.getValue(), refilMaxDelay.getValue()), Math.max(refilMinDelay.getValue(), refilMaxDelay.getValue()));
+
                 start = true;
             }
         }
@@ -98,5 +105,7 @@ public class AutoRefil extends Module {
         refilTimer.reset();
 
         start = false;
+
+        delay = 0;
     }
 }

@@ -15,6 +15,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.*;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.apache.commons.lang3.RandomUtils;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Arrays;
@@ -25,19 +26,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class AutoRecraft extends Module {
+    private final NumberSetting<Integer> startMinDelay = new NumberSetting<>("Start Min Delay", 30, 1, 400, 1);
+    private final NumberSetting<Integer> startMaxDelay = new NumberSetting<>("Start Max Delay", 42, 1, 400, 1);
+    private final NumberSetting<Integer> recraftMinDelay = new NumberSetting<>("Recraft Min Delay", 30, 1, 400, 1);
+    private final NumberSetting<Integer> recraftMaxDelay = new NumberSetting<>("Recraft Max Delay", 42, 1, 400, 1);
     private final ListSetting mode = new ListSetting("Mode", 0, new String[]{"Automatic", "Manual", "Both"});
     private final KeybindSetting manualBind = new KeybindSetting("Manual bind", Keyboard.KEY_NONE);
     private final NumberSetting<Integer> startWith = new NumberSetting<>("Start with", 3, 0, 41, 1);
-    private final NumberSetting<Integer> recraftDelay = new NumberSetting<>("Recraft Delay", 42, 1, 400, 1);
-    private final BooleanSetting cocoaMode = new BooleanSetting("Cocoa", false);
+    private final BooleanSetting cactusMode = new BooleanSetting("Cactus", false);
+    private final BooleanSetting cocoaMode = new BooleanSetting("Cocoa", true);
     private final BooleanSetting mushroomMode = new BooleanSetting("Mushroom", true);
-    private final BooleanSetting cactusMode = new BooleanSetting("Cactus", true);
     private final ListSetting sortMode = new ListSetting("Sort by", 0, new String[]{"Size", "Index"});
 
+    private final TimerHelper startTimer = new TimerHelper();
     private final TimerHelper recraftTimer = new TimerHelper();
 
     private final HashMap<String, Integer> recraftMap = new HashMap<>();
     public boolean start = false;
+    private long recraftDelay = RandomUtils.nextLong(Math.min(recraftMinDelay.getValue(), recraftMaxDelay.getValue()), Math.max(recraftMinDelay.getValue(), recraftMaxDelay.getValue()));
     private int step = 1;
 
     public AutoRecraft() {
@@ -66,7 +72,9 @@ public class AutoRecraft extends Module {
 
         if (start) {
             if (!recraftMap.isEmpty()) {
-                if (recraftTimer.hasTimeReached(recraftDelay.getValue(), true)) {
+                if (recraftTimer.hasTimeReached(recraftDelay, true)) {
+                    recraftDelay = RandomUtils.nextLong(Math.min(recraftMinDelay.getValue(), recraftMaxDelay.getValue()), Math.max(recraftMinDelay.getValue(), recraftMaxDelay.getValue()));
+
                     if (recraftMap.size() == 2) { // outros recraft
                         switch (step) {
                             case 1:
@@ -215,15 +223,18 @@ public class AutoRecraft extends Module {
         } else {
             if ((!mode.getValue().equals("Manual") && InventoryUtil.getTotalSoupsInInventory() <= startWith.getValue()) ||
                     (!mode.getValue().equals("Automatic") && Keyboard.isKeyDown(manualBind.getValue()))) {
-                if (cactusMode.getValue() && hasCactusRecraft()) {
-                    getRecraft(1);
-                } else if (cocoaMode.getValue() && hasCocoaRecraft()) {
-                    getRecraft(2);
-                } else if (mushroomMode.getValue() && hasMushroomRecraft()) {
-                    getRecraft(3);
-                }
+                if (startTimer.hasTimeReached(RandomUtils.nextLong(Math.min(startMinDelay.getValue(), startMaxDelay.getValue()), Math.max(startMinDelay.getValue(), startMaxDelay.getValue())), true)) {
+                    if (cactusMode.getValue() && hasCactusRecraft()) {
+                        getRecraft(1);
+                    } else if (cocoaMode.getValue() && hasCocoaRecraft()) {
+                        getRecraft(2);
+                    } else if (mushroomMode.getValue() && hasMushroomRecraft()) {
+                        getRecraft(3);
+                    }
 
-                start = true;
+                    recraftDelay = RandomUtils.nextLong(Math.min(recraftMinDelay.getValue(), recraftMaxDelay.getValue()), Math.max(recraftMinDelay.getValue(), recraftMaxDelay.getValue()));
+                    start = true;
+                }
             }
         }
     }
@@ -298,8 +309,8 @@ public class AutoRecraft extends Module {
 
     /*
      * modes:
-     * 1 - cocoa
-     * 2 - cactus
+     * 1 - cactus
+     * 2 - cocoa
      * 3 - mushroom
      */
     private void getRecraft(int mode) {
@@ -313,9 +324,11 @@ public class AutoRecraft extends Module {
                     case 1:
                         if (itemStack.getItem() == Items.bowl) {
                             itemSlotMap.put(i, "bowl");
-                        } else if (itemStack.getItem() instanceof ItemDye) {
-                            if (EnumDyeColor.byDyeDamage(itemStack.getMetadata()) == EnumDyeColor.BROWN) {
-                                itemSlotMap.put(i, "cocoa");
+                        } else if (itemStack.getItem() instanceof ItemBlock) {
+                            Block block = ((ItemBlock) itemStack.getItem()).getBlock();
+
+                            if (block == Blocks.cactus) {
+                                itemSlotMap.put(i, "cactus");
                             }
                         }
 
@@ -323,13 +336,9 @@ public class AutoRecraft extends Module {
                     case 2:
                         if (itemStack.getItem() == Items.bowl) {
                             itemSlotMap.put(i, "bowl");
-                        } else if (itemStack.getItem() instanceof ItemBlock) {
-                            Block block = ((ItemBlock) itemStack.getItem()).getBlock();
-
-                            if (block == Blocks.red_mushroom) {
-                                itemSlotMap.put(i, "red");
-                            } else if (block == Blocks.brown_mushroom) {
-                                itemSlotMap.put(i, "brown");
+                        } else if (itemStack.getItem() instanceof ItemDye) {
+                            if (EnumDyeColor.byDyeDamage(itemStack.getMetadata()) == EnumDyeColor.BROWN) {
+                                itemSlotMap.put(i, "cocoa");
                             }
                         }
 
@@ -340,8 +349,10 @@ public class AutoRecraft extends Module {
                         } else if (itemStack.getItem() instanceof ItemBlock) {
                             Block block = ((ItemBlock) itemStack.getItem()).getBlock();
 
-                            if (block == Blocks.cactus) {
-                                itemSlotMap.put(i, "cactus");
+                            if (block == Blocks.red_mushroom) {
+                                itemSlotMap.put(i, "red");
+                            } else if (block == Blocks.brown_mushroom) {
+                                itemSlotMap.put(i, "brown");
                             }
                         }
 
@@ -363,9 +374,12 @@ public class AutoRecraft extends Module {
 
     private void reset() {
         recraftTimer.reset();
+        startTimer.reset();
+
         recraftMap.clear();
 
         start = false;
         step = 1;
+        recraftDelay = 0;
     }
 }

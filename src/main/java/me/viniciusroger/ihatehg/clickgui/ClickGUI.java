@@ -12,6 +12,7 @@ import net.superblaubeere27.gui.Utils;
 import net.superblaubeere27.gui.Window;
 import net.superblaubeere27.gui.components.*;
 import net.superblaubeere27.gui.components.Label;
+import net.superblaubeere27.gui.components.ScrollPane;
 import net.superblaubeere27.gui.layout.GridLayout;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -28,7 +29,7 @@ public class ClickGUI extends GuiScreen {
 
     @SuppressWarnings("unchecked")
     public ClickGUI() {
-        Pane contentPane = new Pane(windowRenderer, new GridLayout(1));
+        Pane contentPane = new ScrollPane(windowRenderer, new GridLayout(1));
 
         ArrayList<Spoiler> modulesSpoiler = new ArrayList<>();
 
