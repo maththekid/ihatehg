@@ -97,15 +97,11 @@ public class AutoSoup extends Module {
                     break;
                 case 3:
                     if (dropSoup.getValue()) {
-                        if (mc.thePlayer.inventoryContainer.getSlot(soupIndex + 36).getStack() == null) {
-                            step++;
-
-                            break;
-                        }
-
                         if (dropTimer.hasTimeReached(dropDelay.getValue(), true)) {
                             C07PacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? C07PacketPlayerDigging.Action.DROP_ALL_ITEMS : C07PacketPlayerDigging.Action.DROP_ITEM;
                             mc.getNetHandler().getNetworkManager().sendPacket(new C07PacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
+
+                            step++;
                         }
                     } else {
                         step++;
